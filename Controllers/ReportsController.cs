@@ -10,6 +10,25 @@ namespace MyEcommerce.Controllers;
 [ApiController]
 public class ReportsController(EcommerceContext context) : ControllerBase
 {
+
+    private static readonly Func<EcommerceContext, int, IAsyncEnumerable<Product>> GetProductsByCategory =
+        EF.CompileAsyncQuery((EcommerceContext context, int categoryId) =>
+            context.Products.Where(p => p.CategoryId == categoryId));
+
+
+    // private static readonly Func<EcommerceContext, string, Task<Customer?>> GetCustomerByEmail =
+    //     EF.CompileAsyncQuery((EcommerceContext context, string email) =>
+    //         context.Customers.FirstOrDefault(c => c.Email == email));
+    //
+    //
+    // private static readonly Func<EcommerceContext, int, Task<Order?>> GetOrderSummary =
+    //     EF.CompileAsyncQuery((EcommerceContext context, int orderId) =>
+    //         context.Orders
+    //             .Include(o => o.OrderItems)
+    //             .FirstOrDefault(o => o.OrderId == orderId));
+
+
+
     [HttpGet("CityAnalysis")]
     public async Task<ActionResult<IEnumerable<SalesByCustomerCityDto>>> GetCityAnalysis()
     {
@@ -30,9 +49,9 @@ public class ReportsController(EcommerceContext context) : ControllerBase
             .Select(g => new SalesByCustomerCityDto
             {
                 City = g.Key,
-                TotalOrders =  g.Count(),
-                TotalSpent = g.SelectMany(o=>o.OrderItems) 
-                    .Sum(o =>  o.UnitPrice * o.Quantity)
+                TotalOrders = g.Count(),
+                TotalSpent = g.SelectMany(o => o.OrderItems)
+                    .Sum(o => o.UnitPrice * o.Quantity)
             })
             .ToListAsync();
         return report;
@@ -51,7 +70,7 @@ public class ReportsController(EcommerceContext context) : ControllerBase
             {
                 Year = g.Key.year,
                 Month = g.Key.month,
-        
+
                 TotalRevenue = g.SelectMany(o => o.OrderItems)
                     .Sum(oi => oi.Quantity * oi.UnitPrice)
             })
@@ -64,7 +83,7 @@ public class ReportsController(EcommerceContext context) : ControllerBase
     public async Task<ActionResult<IEnumerable<TopProductsPerCategoryDto>>> GetTop3ProductPerCategory()
     {
         var report = await context.Categories
-            .Select(c=> new TopProductsPerCategoryDto
+            .Select(c => new TopProductsPerCategoryDto
             {
                 CategoryName = c.Name,
                 TopProducts = c.Products
@@ -74,7 +93,7 @@ public class ReportsController(EcommerceContext context) : ControllerBase
                         Revenue = p.OrderItems
                             .Sum(oi => oi.Quantity * oi.UnitPrice)
                     })
-                    .OrderByDescending(p =>p.Revenue)
+                    .OrderByDescending(p => p.Revenue)
                     .Take(3)
                     .ToList()
             })
@@ -104,24 +123,25 @@ public class ReportsController(EcommerceContext context) : ControllerBase
         //     .Select(g => g.First())
         //     .ToList();
         // return uniqueReport;
-        
+
     }
+
     [HttpGet("GetTotalRevenue")]
     public async Task<ActionResult<object>> GetTotalRevenue()
     {
         var result = await context.RevenueResults
             .FromSqlRaw("select * from get_total_revenue()")
             .ToListAsync();
-       
+
         var total = result.FirstOrDefault()?.TotalRevenue ?? 0;
         return new { TotalRevenue = total };
-            
+
     }
-    
+
     [HttpGet("ProductSales/{id}")]
     public async Task<ActionResult<object>> GetSales(int id)
     {
-      
+
         var result = await context.RevenueResults
             .FromSqlRaw("SELECT * FROM get_product_sales({0})", id)
             .ToListAsync();
@@ -130,8 +150,8 @@ public class ReportsController(EcommerceContext context) : ControllerBase
 
         return new { ProductId = id, Sales = total };
     }
-    
-    
+
+
     [HttpGet("AllPayments")]
     public async Task<ActionResult<object>> GetAllPayments()
     {
@@ -146,7 +166,7 @@ public class ReportsController(EcommerceContext context) : ControllerBase
                 PayPalPayment => "PayPal",
                 _ => "Unknown"
             },
-           
+
             Details = p switch
             {
                 CreditCardPayment c => $"Card: {c.Cardholdername}",
@@ -157,6 +177,13 @@ public class ReportsController(EcommerceContext context) : ControllerBase
 
         return result.ToList();
     }
-    
-    
+
+    [HttpGet("ByCategory/{categoryId}")]
+    public async Task<IActionResult> GetByCategory(int categoryId)
+    {
+
+        var products = GetProductsByCategory(context, categoryId);
+        return Ok(await products.ToListAsync());
+    }
+
 }
