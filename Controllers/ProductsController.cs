@@ -15,35 +15,35 @@ public class ProductsController(EcommerceContext context) : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
     {
-      
+
         return await context.Products
             .Include(p => p.Category)
             .OrderBy(p => p.Name)
             .ToListAsync();
     }
-    
+
     // GET: api/Products/5
     [HttpGet("{id}")]
     public async Task<ActionResult<Product>> GetProduct(int id)
     {
-      
+
         var product = await context.Products
-            .Include(p => p.Category) 
+            .Include(p => p.Category)
             .FirstOrDefaultAsync(p => p.ProductId == id);
 
         if (product == null)
         {
-            return NotFound(); 
+            return NotFound();
         }
 
         return product;
     }
-    
+
     [HttpGet("never-ordered-products")]
     public async Task<ActionResult<IEnumerable<string>>> GetNeverOrderedProducts()
     {
         var products = await context.Products
-            .Where(p => p.OrderItems.Count() == 0) 
+            .Where(p => p.OrderItems.Count() == 0)
             .Select(p => p.Name)
             .ToListAsync();
 
@@ -53,16 +53,16 @@ public class ProductsController(EcommerceContext context) : ControllerBase
     [HttpPost("orders-by-products-count")]
     public async Task<ActionResult<int>> GetOrdersByProductsCount(List<int> IDs)
     {
-       
+
         var ordersCount = await context.OrderItems
             .Where(oi => IDs.Contains(oi.ProductId))
             .GroupBy(oi => oi.OrderId)
-            .CountAsync(); 
+            .CountAsync();
 
-        return ordersCount ;
+        return ordersCount;
     }
-    
-    
+
+
     // [HttpPost("orders-by-products")]
     // public async Task<ActionResult<int>> GetOrdersByProducts(List<int> IDs)
     // {
@@ -73,9 +73,9 @@ public class ProductsController(EcommerceContext context) : ControllerBase
     //         .FirstOrDefaultAsync();
     //     return order;
     // } 
-    
+
     [HttpGet("OrderedProducts")]
-    public async Task<ActionResult> GetOrderedProducts() 
+    public async Task<ActionResult> GetOrderedProducts()
     {
         var products = await context.Products
             .OrderBy(p => p.Category.Name)
@@ -120,24 +120,24 @@ public class ProductsController(EcommerceContext context) : ControllerBase
             .OrderBy(p => p.Name)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
-            .Select(p=> new ProductSummaryDto
-            { 
-              Name  = p.Name,
-               Price = p.Price, 
-               CategoryName = p.Category.Name
+            .Select(p => new ProductSummaryDto
+            {
+                Name = p.Name,
+                Price = p.Price,
+                CategoryName = p.Category.Name
             })
             .ToListAsync();
-        
-        var response = new PaginationDto<ProductSummaryDto>(product , totalCount, pageNumber,pageSize);
+
+        var response = new PaginationDto<ProductSummaryDto>(product, totalCount, pageNumber, pageSize);
         return Ok(response);
     }
-    
+
     [HttpPatch("SimulateConflict/{id}")]
     public async Task<ActionResult<object>> SimulateConflict(int id)
     {
         var options = HttpContext.RequestServices
             .GetRequiredService<DbContextOptions<EcommerceContext>>();
-        
+
         using var contextA = new EcommerceContext(options);
         var productA = await contextA.Products.FindAsync(id);
 
@@ -146,7 +146,7 @@ public class ProductsController(EcommerceContext context) : ControllerBase
 
         if (productA != null)
         {
-            productA.Stockquantity = 100; 
+            productA.Stockquantity = 100;
             await contextA.SaveChangesAsync();
         }
 
@@ -164,9 +164,9 @@ public class ProductsController(EcommerceContext context) : ControllerBase
                 var databaseValues = await entry.GetDatabaseValuesAsync();
                 var dbProduct = (Product)databaseValues.ToObject();
 
-                return new 
-                { 
-                    Error = "Conflict Detected!", 
+                return new
+                {
+                    Error = "Conflict Detected!",
                     CurrentDbStock = dbProduct.Stockquantity,
                     YourProposedStock = productB.Stockquantity
                 };
@@ -175,9 +175,34 @@ public class ProductsController(EcommerceContext context) : ControllerBase
 
         return "Product not found";
     }
-    
-    
-} 
+
+}
+
+        // IEnumerable<Product> products;
+        // using (var context = new EcommerceContext()) 
+        //    {
+        // products = context.Products.AsEnumerable(); 
+        //   } 
+        //   
+        // foreach (var p in products) 
+        // {
+        //    Console.WriteLine(p.Name); 
+        // }
+
+       /////////////------------------
+
+       // List<Product> products;
+       // using (var context = new EcommerceContext()) 
+       // {
+       //     products = context.Products.ToList(); 
+       // } 
+       // foreach (var p in products) 
+       // {
+       //     Console.WriteLine(p.Name); 
+       // }
+
+
+
 
 // public static class QueryableExtensions
 // { public static IQueryable<T> OrderByDynamic<T>(this IQueryable<T> query, string propertyName, bool isDescending)
