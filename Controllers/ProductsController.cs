@@ -179,7 +179,28 @@ public class ProductsController(EcommerceContext context) : ControllerBase
 }
 
         
+// IEnumerable<Product> products;
+// using (var context = new EcommerceContext()) 
+//    {
+// products = context.Products.AsEnumerable(); 
+//   } 
+//   
+// foreach (var p in products) 
+// {
+//    Console.WriteLine(p.Name); 
+// }
 
+/////////////------------------
+
+// List<Product> products;
+// using (var context = new EcommerceContext()) 
+// {
+//     products = context.Products.ToList(); 
+// } 
+// foreach (var p in products) 
+// {
+//     Console.WriteLine(p.Name); 
+// }
 
 
 
