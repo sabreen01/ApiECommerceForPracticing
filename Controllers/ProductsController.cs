@@ -182,16 +182,14 @@ public class ProductsController(EcommerceContext context) : ControllerBase
 // public static class QueryableExtensions
 // { public static IQueryable<T> OrderByDynamic<T>(this IQueryable<T> query, string propertyName, bool isDescending)
 //     {
-//         // 1. إنشاء الـ Parameter (الـ p في p => p.Name)
+//        
 //         var parameter = Expression.Parameter(typeof(T), "p");
-//         // 2. الوصول للخاصية (الـ p.Name)
-//         // بنستخدم اسم العمود "propertyName" اللي جاي من اليوزر كـ نص
 //         var property = Expression.Property(parameter, propertyName);
-//         // 3. بناء الـ Lambda Expression (p => p.Name)
+//         
 //         var lambda = Expression.Lambda(property, parameter);
-//         // 4. تحديد اسم الدالة (OrderBy أو OrderByDescending)
+//         
 //         string methodName = isDescending ? "OrderByDescending" : "OrderBy";
-//         // 5. استدعاء الدالة برمجياً
+//        
 //         var resultExpression = Expression.Call(
 //             typeof(Queryable), 
 //             methodName, 
