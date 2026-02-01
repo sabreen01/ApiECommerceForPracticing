@@ -1,7 +1,7 @@
-using MyEcommerce.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using MyEcommerce.DTOs; 
+using MyEcommerce.DTOs;
+using MyEcommerce.Models; 
 
 namespace MyEcommerce.Controllers;
 

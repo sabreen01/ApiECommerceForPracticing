@@ -1,8 +1,8 @@
 
-using MyEcommerce.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using MyEcommerce.DTOs; 
+using MyEcommerce.DTOs;
+using MyEcommerce.Models; 
 
 namespace MyEcommerce.Controllers;
 
@@ -83,6 +83,7 @@ public class ReportsController(EcommerceContext context) : ControllerBase
     public async Task<ActionResult<IEnumerable<TopProductsPerCategoryDto>>> GetTop3ProductPerCategory()
     {
         var report = await context.Categories
+            .AsNoTracking()
             .Select(c => new TopProductsPerCategoryDto
             {
                 CategoryName = c.Name,
