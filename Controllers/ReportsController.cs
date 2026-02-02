@@ -2,19 +2,21 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyEcommerce.DTOs;
+using MyEcommerce.Interfaces;
 using MyEcommerce.Models; 
 
 namespace MyEcommerce.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class ReportsController(EcommerceContext context) : ControllerBase
+public class ReportsController(IReportService reportService,EcommerceContext context) : ControllerBase
 {
+    
 
     private static readonly Func<EcommerceContext, int, IAsyncEnumerable<Product>> GetProductsByCategory =
         EF.CompileAsyncQuery((EcommerceContext context, int categoryId) =>
             context.Products.Where(p => p.CategoryId == categoryId));
-
+    
 
     // private static readonly Func<EcommerceContext, string, Task<Customer?>> GetCustomerByEmail =
     //     EF.CompileAsyncQuery((EcommerceContext context, string email) =>
@@ -32,6 +34,8 @@ public class ReportsController(EcommerceContext context) : ControllerBase
     [HttpGet("CityAnalysis")]
     public async Task<ActionResult<IEnumerable<SalesByCustomerCityDto>>> GetCityAnalysis()
     {
+        var data = await reportService.GetCityAnalysis();
+        return Ok(data);
         // var report = await context.Orders
         //     .GroupBy(o=> o.City)
         //     .Select(g => new SalesByCustomerCityDto
@@ -44,62 +48,25 @@ public class ReportsController(EcommerceContext context) : ControllerBase
         //     })
         //     .ToListAsync();
         // return report;
-        var report = await context.Orders
-            .GroupBy(o => o.Address.City)
-            .Select(g => new SalesByCustomerCityDto
-            {
-                City = g.Key,
-                TotalOrders = g.Count(),
-                TotalSpent = g.SelectMany(o => o.OrderItems)
-                    .Sum(o => o.UnitPrice * o.Quantity)
-            })
-            .ToListAsync();
-        return report;
+        
     }
 
     [HttpGet("MonthAnalysisForSalse")]
     public async Task<ActionResult<IEnumerable<MonthlySalesDto>>> GetMonthlySalesForSalse()
     {
-        var report = await context.Orders
-            .GroupBy(o => new
-            {
-                year = o.OrderDate.Value.Year,
-                month = o.OrderDate.Value.Month
-            })
-            .Select(g => new MonthlySalesDto
-            {
-                Year = g.Key.year,
-                Month = g.Key.month,
-
-                TotalRevenue = g.SelectMany(o => o.OrderItems)
-                    .Sum(oi => oi.Quantity * oi.UnitPrice)
-            })
-            .ToListAsync();
-
-        return report;
+        var data = await reportService.GetMonthlySalesForSalse();
+        return Ok(data);
+        
     }
 
     [HttpGet("Top-3-product-per-category")]
     public async Task<ActionResult<IEnumerable<TopProductsPerCategoryDto>>> GetTop3ProductPerCategory()
     {
-        var report = await context.Categories
-            .AsNoTracking()
-            .Select(c => new TopProductsPerCategoryDto
-            {
-                CategoryName = c.Name,
-                TopProducts = c.Products
-                    .Select(p => new ProductRevenue
-                    {
-                        ProductName = p.Name,
-                        Revenue = p.OrderItems
-                            .Sum(oi => oi.Quantity * oi.UnitPrice)
-                    })
-                    .OrderByDescending(p => p.Revenue)
-                    .Take(3)
-                    .ToList()
-            })
-            .ToListAsync();
-        return report;
+
+        var data = reportService.GetTop3ProductPerCategory();
+        return Ok(data);
+
+
 
         // var report = await context.Products
         //     .Select(p => new TopProductsPerCategoryDto
@@ -130,26 +97,18 @@ public class ReportsController(EcommerceContext context) : ControllerBase
     [HttpGet("GetTotalRevenue")]
     public async Task<ActionResult<object>> GetTotalRevenue()
     {
-        var result = await context.RevenueResults
-            .FromSqlRaw("select * from get_total_revenue()")
-            .ToListAsync();
-
-        var total = result.FirstOrDefault()?.TotalRevenue ?? 0;
-        return new { TotalRevenue = total };
+        var data = await reportService.GetTotalRevenue();
+        return data;
+        
 
     }
 
     [HttpGet("ProductSales/{id}")]
     public async Task<ActionResult<object>> GetSales(int id)
     {
+        var data = await reportService.GetSales(id);
+        return data;
 
-        var result = await context.RevenueResults
-            .FromSqlRaw("SELECT * FROM get_product_sales({0})", id)
-            .ToListAsync();
-
-        var total = result.FirstOrDefault()?.TotalRevenue ?? 0;
-
-        return new { ProductId = id, Sales = total };
     }
 
 

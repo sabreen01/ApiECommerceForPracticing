@@ -1,7 +1,9 @@
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
+using MyEcommerce.Interfaces;
 using MyEcommerce.Middlewares;
-using MyEcommerce.Models; 
+using MyEcommerce.Models;
+using MyEcommerce.Services;
 using Scalar.AspNetCore;
 
 
@@ -12,6 +14,8 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
 });
+
+builder.Services.AddScoped<IReportService, ReportService>();
 
 builder.Services.AddOpenApi();
 
