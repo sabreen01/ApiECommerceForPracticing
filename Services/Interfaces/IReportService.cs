@@ -1,6 +1,6 @@
 using MyEcommerce.DTOs;
 
-namespace MyEcommerce.Interfaces;
+namespace MyEcommerce.Services.Interfaces;
 
 public interface IReportService
 {

@@ -1,11 +1,12 @@
 using System.Linq.Dynamic.Core;
-using System.Linq.Expressions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyEcommerce.DTOs;
 using MyEcommerce.Models;
 
 namespace MyEcommerce.Controllers;
+
 
 [Route("api/[controller]")]
 [ApiController]
@@ -109,7 +110,7 @@ public class ProductsController(EcommerceContext context) : ControllerBase
         return Ok(products);
     }
 
-
+    [Authorize(Roles = "Admin")]
     [HttpGet("GetPagedProducts")]
     public async Task<ActionResult<PaginationDto<ProductSummaryDto>>> GetPagedProducts([FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10)

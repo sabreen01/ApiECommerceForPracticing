@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using MyEcommerce.DTOs;
 
 namespace MyEcommerce.Models;
 
-public partial class EcommerceContext : DbContext
+public partial class EcommerceContext : IdentityDbContext<ApplicationUser>
 {
     public EcommerceContext()
     {
@@ -25,9 +26,10 @@ public partial class EcommerceContext : DbContext
     public virtual DbSet<Product> Products { get; set; }
     public virtual DbSet<RevenueResultDto> RevenueResults { get; set; }
     
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        
+        base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<RevenueResultDto>(entity => {
             entity.HasNoKey(); 
         });

@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MyEcommerce.DTOs;
-using MyEcommerce.Interfaces;
 using MyEcommerce.Models;
+using MyEcommerce.Services.Interfaces;
 
 namespace MyEcommerce.Services;
 

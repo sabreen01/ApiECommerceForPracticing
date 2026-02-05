@@ -2,8 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyEcommerce.DTOs;
-using MyEcommerce.Interfaces;
-using MyEcommerce.Models; 
+using MyEcommerce.Models;
+using MyEcommerce.Services.Interfaces;
 
 namespace MyEcommerce.Controllers;
 
@@ -24,7 +24,7 @@ public class ReportsController(IReportService reportService,EcommerceContext con
     //
     //
     // private static readonly Func<EcommerceContext, int, Task<Order?>> GetOrderSummary =
-    //     EF.CompileAsyncQuery((EcommerceContext context, int orderId) =>
+    //     EF.CompileAsync Query((EcommerceContext context, int orderId) =>
     //         context.Orders
     //             .Include(o => o.OrderItems)
     //             .FirstOrDefault(o => o.OrderId == orderId));
